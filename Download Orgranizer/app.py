@@ -2,7 +2,7 @@ import os
 import shutil
 
 # Define the path to your download folder
-download_folder = "/Users/lalithchintakrindi/Downloads"
+download_folder = "Your download folder Path"
 
 # Dictionary mapping file extensions to folder names
 folder_mapping = {
