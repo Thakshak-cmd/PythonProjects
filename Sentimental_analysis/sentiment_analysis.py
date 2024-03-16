@@ -1,51 +1,46 @@
-import os
-import shutil
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+from emotion_lexicon import emotion_lexicon
 
-# Define the path to your download folder
-download_folder = "/Users/your_username/Downloads"
+def analyze_overall_emotion(text, emotion_lexicon):
+    sia = SentimentIntensityAnalyzer()
+    sentiment_scores = sia.polarity_scores(text)
+    
+    # Find the emotion with the highest intensity
+    max_emotion = max(sentiment_scores, key=lambda key: sentiment_scores[key])
+    
+    return max_emotion
 
-# Dictionary mapping file extensions to folder names
-folder_mapping = {
-    "pdf": "PDFs",
-    "jpg": "Images",
-    "jpeg": "Images",
-    "png": "Images",
-    "gif": "Images",
-    "mp3": "Music",
-    "wav": "Music",
-    "mp4": "Videos",
-    "mov": "Videos",
-    "zip": "Archives",
-    "rar": "Archives",
-    "exe": "Executables",
-    "dmg": "Disk Images",
-    # Add more file extensions and corresponding folder names as needed
-}
+def analyze_detailed_emotions(text, emotion_lexicon):
+    # Analyze emotions based on the emotion lexicon
+    emotion_counts = {emotion: 0 for emotion in emotion_lexicon.keys()}
+    for word, emotions in emotion_lexicon.items():
+        for emotion in emotions:
+            if emotion in text.lower():
+                emotion_counts[word] += 1
+    
+    return emotion_counts
 
-def organize_files():
-    # Iterate over files in the download folder
-    for filename in os.listdir(download_folder):
-        # Ignore hidden files and folders
-        if not filename.startswith('.'):
-            # Get the file extension
-            _, extension = os.path.splitext(filename)
-            # Remove the leading dot from the extension
-            extension = extension[1:].lower()
-            
-            # Check if the file extension is in the folder mapping
-            if extension in folder_mapping:
-                # Create the destination folder if it doesn't exist
-                destination_folder = os.path.join(download_folder, folder_mapping[extension])
-                if not os.path.exists(destination_folder):
-                    os.makedirs(destination_folder)
-                
-                # Move the file to the destination folder
-                source_path = os.path.join(download_folder, filename)
-                destination_path = os.path.join(destination_folder, filename)
-                shutil.move(source_path, destination_path)
-                print(f"Moved '{filename}' to '{folder_mapping[extension]}' folder.")
-            else:
-                print(f"No folder found for '{filename}', skipping.")
+def main():
+    # Get input text from user
+    text = input("Enter some text: ")
+    
+    # Analyze overall emotion
+    overall_emotion = analyze_overall_emotion(text, emotion_lexicon)
+    print(f'Overall emotion: {overall_emotion.capitalize()}')
+    
+    # Ask the user if they want a more detailed breakdown of emotions
+    choice = input("Do you want a more detailed breakdown of emotions? (yes/no): ")
+    if choice.lower() == 'yes':
+        # Analyze detailed emotions
+        detailed_emotions = analyze_detailed_emotions(text, emotion_lexicon)
+        print("Detailed breakdown of emotions:")
+        for emotion, count in detailed_emotions.items():
+            print(f'{emotion.capitalize()}: {count}')
 
 if __name__ == "__main__":
-    organize_files()
+    # Download NLTK resources
+    nltk.download('vader_lexicon')
+    
+    # Run the main function
+    main()
